@@ -151,18 +151,46 @@
   }
 
   /* ===================== 教程 ===================== */
+  // 8 大组成部分分组（id 顺序与 tutorial.js 一致）
+  var TUT_PARTS = [
+    { name: '① 入门基础', ids: ['note','syntax','select','distinct','where','order','insert','null','update','delete','limit','operators'] },
+    { name: '② 聚合函数', ids: ['agg-overview','count','sum-avg','min-max'] },
+    { name: '③ 过滤与匹配', ids: ['like','in','between','alias'] },
+    { name: '④ 多表连接', ids: ['join-overview','inner-join','left-join','right-join','full-join','self-join','union'] },
+    { name: '⑤ 分组与条件', ids: ['group-by','having','exists','any-all','select-into','insert-select','case','null-func','comments'] },
+    { name: '⑥ 表结构与约束', ids: ['create-db','create-table','drop-table','alter-table','constraints','fk','index','autoinc'] },
+    { name: '⑦ 日期 · 视图 · 安全', ids: ['dates','views','sqli','proc'] },
+    { name: '⑧ 进阶专题', ids: ['subquery','window','cte','func-ref','next'] }
+  ];
   function renderTutorial() {
     var side = $('#tutSide'), main = $('#tutMain');
-    window.SQL_TUTORIAL.forEach(function (sec, idx) {
-      var b = document.createElement('button');
-      b.textContent = sec.title; b.dataset.idx = idx;
-      if (idx === 0) b.classList.add('active');
-      b.addEventListener('click', function () { showTut(idx); });
-      side.appendChild(b);
+    var idxMap = {};
+    window.SQL_TUTORIAL.forEach(function (s, i) { idxMap[s.id] = i; });
+
+    side.innerHTML = '';
+    TUT_PARTS.forEach(function (part) {
+      var ph = document.createElement('div');
+      ph.className = 'tut-part';
+      ph.textContent = part.name;
+      side.appendChild(ph);
+      part.ids.forEach(function (id) {
+        var i = idxMap[id];
+        if (i === undefined) return;
+        var b = document.createElement('button');
+        b.textContent = window.SQL_TUTORIAL[i].title;
+        b.dataset.idx = i;
+        b.className = 'tut-toc-btn';
+        b.addEventListener('click', function () {
+          showTut(i);
+          if (window.innerWidth <= 760) side.classList.remove('open');
+        });
+        side.appendChild(b);
+      });
     });
+
     function showTut(idx) {
       var sec = window.SQL_TUTORIAL[idx];
-      $$('#tutSide button').forEach(function (b) { b.classList.toggle('active', +b.dataset.idx === idx); });
+      $$('#tutSide .tut-toc-btn').forEach(function (b) { b.classList.toggle('active', +b.dataset.idx === idx); });
       var html = '<h3>' + sec.title + '</h3>' + sec.html;
       if (sec.example) {
         html += '<div class="tut-example-head"><b style="font-size:14px">▎可运行示例</b>' +
@@ -171,28 +199,63 @@
       }
       if (sec.tip) html += '<div class="tut-tip">💡 ' + esc(sec.tip) + '</div>';
       main.innerHTML = html;
+      if (history.replaceState) history.replaceState(null, '', '#sec-' + idx);
+      if (window.innerWidth <= 760) main.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
-    showTut(0);
+    window.__showTut = showTut;
+
+    var startIdx = 0;
+    if (location.hash.indexOf('#sec-') === 0) {
+      var h = parseInt(location.hash.slice(5), 10);
+      if (!isNaN(h) && window.SQL_TUTORIAL[h]) startIdx = h;
+    }
+    showTut(startIdx);
+
+    var tog = $('#tocToggle');
+    if (tog) tog.addEventListener('click', function () { side.classList.toggle('open'); });
   }
 
   /* ===================== 速查表 ===================== */
+  var csFilter = '全部';
   function renderCheatsheet() {
     var grid = $('#cheatGrid');
+    var box = $('#cheatFilters');
+    var g = window.Site.getParam('g');
+    if (g) csFilter = g;
+    // 顶部分类筛选（题库式）
+    if (box) {
+      var cats = ['全部'].concat(window.SQL_CHEATSHEET.map(function (grp) { return grp.group; }));
+      box.innerHTML = '';
+      var row = document.createElement('div'); row.className = 'filter-row';
+      row.innerHTML = '<span class="filter-label">分类：</span>';
+      cats.forEach(function (c) {
+        var b = document.createElement('button'); b.textContent = c; b.dataset.cat = c;
+        if (c === csFilter) b.classList.add('active');
+        b.addEventListener('click', function () { csFilter = c; renderCheatsheet(); });
+        row.appendChild(b);
+      });
+      box.appendChild(row);
+    }
+
     grid.innerHTML = '';
     window.SQL_CHEATSHEET.forEach(function (grp) {
-      var card = document.createElement('div');
-      card.className = 'cheat-card';
-      var html = '<h3>' + grp.group + '</h3>';
+      if (csFilter !== '全部' && grp.group !== csFilter) return;
       grp.items.forEach(function (it) {
-        html += '<div class="cheat-row">' +
-          '<span class="cheat-syntax">' + esc(it.syntax) + '</span>' +
-          '<span class="cheat-desc">' + esc(it.desc) + '</span>' +
-          '<button class="copy-btn" data-copy="' + encodeURIComponent(it.syntax) + '">复制</button>' +
+        var card = document.createElement('div');
+        card.className = 'cheat-card';
+        card.innerHTML =
+          '<div class="cheat-card-head"><span class="cheat-group">' + esc(grp.group) + '</span></div>' +
+          '<pre class="cheat-syntax">' + esc(it.syntax) + '</pre>' +
+          '<div class="cheat-meta">' +
+            '<span class="cheat-desc">' + esc(it.desc) + '</span>' +
+            '<button class="copy-btn" data-copy="' + encodeURIComponent(it.syntax) + '">复制</button>' +
           '</div>';
+        grid.appendChild(card);
       });
-      card.innerHTML = html;
-      grid.appendChild(card);
     });
+    if (!grid.children.length) {
+      grid.innerHTML = '<div class="search-empty">该分类下暂无内容。</div>';
+    }
     $$('#cheatGrid .copy-btn').forEach(function (b) {
       b.addEventListener('click', function () { window.Site.copyText(decodeURIComponent(b.dataset.copy), b); });
     });
@@ -235,6 +298,7 @@
     filtered.forEach(function (q) {
       var card = document.createElement('div');
       card.className = 'q-card';
+      card.id = 'q-card-' + q.id;
       card.innerHTML =
         '<div class="q-top"><span class="q-no"># ' + q.id + '</span>' +
           '<span class="q-cat">' + esc(q.category) + '</span>' +
@@ -263,8 +327,22 @@
     } else if (page === 'cheatsheet') {
       renderCheatsheet();
     } else if (page === 'questions') {
-      renderQuestionFilters();
-      renderQuestions();
+      // 从搜索/深链进来时，先重置筛选再打开对应题目
+      if (location.hash.indexOf('#q-') === 0) {
+        qFilterDiff = '全部'; qFilterCat = '全部';
+        renderQuestionFilters();
+        renderQuestions();
+        var qid = location.hash.slice(3);
+        var card = document.getElementById('q-card-' + qid);
+        if (card) {
+          card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          var tog = card.querySelector('[data-act="toggle"]');
+          if (tog) tog.click();
+        }
+      } else {
+        renderQuestionFilters();
+        renderQuestions();
+      }
     } else if (page === 'practice') {
       bindPractice();
       var qid = window.Site.getParam('q');

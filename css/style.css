@@ -110,6 +110,12 @@ main { max-width: 1180px; margin: 0 auto; padding: 22px 24px 60px; }
 }
 .tut-side button:hover { background: var(--brand-soft); }
 .tut-side button.active { background: var(--brand); color: #fff; }
+.tut-part {
+  font-size: 12px; font-weight: 700; color: var(--muted); letter-spacing: .03em;
+  padding: 14px 12px 5px; margin-top: 4px; border-top: 1px solid var(--line);
+}
+.tut-part:first-child { border-top: none; margin-top: 0; }
+.toc-toggle { display: none; }
 .tut-main {
   flex: 1; min-width: 0; background: var(--panel); border: 1px solid var(--line);
   border-radius: var(--radius); padding: 24px 28px; box-shadow: var(--shadow);
@@ -132,24 +138,25 @@ main { max-width: 1180px; margin: 0 auto; padding: 22px 24px 60px; }
 }
 .tut-example-head { display: flex; align-items: center; justify-content: space-between; margin-top: 18px; gap: 10px; flex-wrap: wrap; }
 
-/* ---------- 速查表 ---------- */
-.cheat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
+/* ---------- 速查表（题库式卡片） ---------- */
+.cheat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
 .cheat-card {
   background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
-  padding: 14px 16px; box-shadow: var(--shadow);
+  padding: 12px 14px; box-shadow: var(--shadow);
+  display: flex; flex-direction: column; gap: 8px;
 }
-.cheat-card h3 { margin: 0 0 10px; font-size: 16px; color: var(--brand); }
-.cheat-row {
-  display: flex; align-items: center; justify-content: space-between; gap: 10px;
-  padding: 7px 0; border-top: 1px dashed var(--line);
+.cheat-card-head { display: flex; }
+.cheat-group {
+  font-size: 11px; padding: 2px 8px; border-radius: 999px;
+  background: var(--brand-soft); color: var(--brand); font-weight: 600;
 }
-.cheat-row:first-of-type { border-top: none; }
 .cheat-syntax {
-  font-family: "SFMono-Regular", Consolas, monospace; font-size: 12.8px;
-  background: var(--code-bg); padding: 4px 8px; border-radius: 6px; flex: 1; min-width: 0;
-  overflow-x: auto; white-space: nowrap;
+  font-family: "SFMono-Regular", Consolas, monospace; font-size: 12.8px; line-height: 1.5;
+  background: #0f1626; color: #e6ecf5; padding: 10px 12px; border-radius: 8px;
+  overflow-x: auto; white-space: pre; margin: 0;
 }
-.cheat-desc { color: var(--muted); font-size: 12.5px; flex: 0 0 88px; text-align: right; }
+.cheat-meta { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.cheat-desc { color: var(--muted); font-size: 12.5px; }
 .copy-btn {
   border: none; background: var(--brand-soft); color: var(--brand); cursor: pointer;
   border-radius: 6px; padding: 4px 8px; font-size: 12px; flex: 0 0 auto;
@@ -262,15 +269,19 @@ table.result-tbl tr:nth-child(even) td { background: #fafbfe; }
   .home { padding: 16px 14px 50px; }
 
   .tut-layout { flex-direction: column; }
-  .tut-side {
-    position: static; width: 100%; max-height: none; display: flex; gap: 6px;
-    overflow-x: auto; padding-bottom: 6px;
+  .toc-toggle {
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    width: 100%; border: 1px solid var(--line); background: #fff; border-radius: 10px;
+    padding: 12px; font-size: 14px; cursor: pointer; margin-bottom: 12px; color: var(--ink);
   }
-  .tut-side button { width: auto; white-space: nowrap; }
+  .tut-side { display: none; }
+  .tut-side.open {
+    display: block; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 60;
+    background: var(--panel); padding: 16px; max-height: none; overflow: auto; box-shadow: var(--shadow);
+  }
   .tut-main { padding: 18px 16px; }
 
   .cheat-grid, .q-list { grid-template-columns: 1fr; }
-  .cheat-desc { flex-basis: 70px; }
   .hero h1 { font-size: 24px; }
 }
 
@@ -278,3 +289,44 @@ table.result-tbl tr:nth-child(even) td { background: #fafbfe; }
   .editor-actions .btn { padding: 7px 10px; font-size: 12.5px; }
   .q-actions .btn { flex: 1 1 auto; text-align: center; }
 }
+
+/* ---------- 全网搜索 ---------- */
+.search-toggle {
+  border: 1px solid var(--line); background: #fff; color: var(--ink);
+  border-radius: 999px; width: 38px; height: 38px; font-size: 18px; cursor: pointer; flex: 0 0 auto;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.search-toggle:hover { border-color: var(--brand); }
+.search-modal { position: fixed; inset: 0; z-index: 100; display: flex; }
+.search-modal[hidden] { display: none; }
+.search-overlay { position: absolute; inset: 0; background: rgba(15,22,38,.45); }
+.search-panel {
+  position: relative; margin: 7vh auto 0; width: min(700px, 92vw); max-height: 86vh;
+  background: var(--panel); border-radius: 14px; box-shadow: var(--shadow);
+  display: flex; flex-direction: column; overflow: hidden;
+}
+.search-bar { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+.search-bar input {
+  flex: 1; border: none; outline: none; font-size: 16px; padding: 8px;
+  background: transparent; color: var(--ink);
+}
+.search-close { border: none; background: transparent; font-size: 20px; cursor: pointer; color: var(--muted); padding: 4px 8px; line-height: 1; }
+.search-results { overflow: auto; padding: 8px 12px 16px; -webkit-overflow-scrolling: touch; }
+.search-empty { color: var(--muted); text-align: center; padding: 32px 10px; font-size: 13.5px; }
+.search-group { margin-top: 8px; }
+.search-group-h { font-size: 12.5px; color: var(--muted); font-weight: 700; margin: 8px 2px 4px; }
+.search-item {
+  display: flex; align-items: center; gap: 8px; text-decoration: none; color: var(--ink);
+  padding: 10px; border-radius: 8px; font-size: 14px; border: 1px solid transparent;
+}
+.search-item:hover { background: var(--brand-soft); border-color: #cfe0ff; }
+.si-type { font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 6px; flex: 0 0 auto; color: #fff; }
+.si-type.tut { background: var(--brand); }
+.si-type.cheat { background: var(--orange); }
+.si-type.q { background: var(--green); }
+.search-item code {
+  font-family: "SFMono-Regular", Consolas, monospace; font-size: 12.5px;
+  background: var(--code-bg); padding: 2px 6px; border-radius: 5px; color: var(--ink);
+}
+.si-desc { color: var(--muted); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.search-more { color: var(--muted); font-size: 12px; padding: 4px 10px; }
