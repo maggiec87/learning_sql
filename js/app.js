@@ -11,7 +11,7 @@
   var esc = window.Site.escapeHtml;
 
   /* ===================== 训练场引擎 ===================== */
-  var DB = null, SQL = null, pendingRun = null;
+  var DB = null, SQL = null, pendingRun = null, currentQid = null;
 
   function setStatus(msg) { var m = $('#engineStatus'); if (m) m.textContent = msg; }
 
@@ -94,7 +94,16 @@
   }
 
   function bindPractice() {
-    $('#runBtn').addEventListener('click', function () { runQuery($('#sqlInput').value); });
+    // 题目模式下，每次运行都计入练习次数
+    function doRun() {
+      if (currentQid) {
+        var n = window.Site.bumpPractice(currentQid);
+        var badge = $('#qmCount');
+        if (badge) badge.textContent = '📈 已练习 ' + n + ' 次';
+      }
+      runQuery($('#sqlInput').value);
+    }
+    $('#runBtn').addEventListener('click', doRun);
     $('#clearBtn').addEventListener('click', function () { $('#sqlInput').value = ''; $('#sqlInput').focus(); });
     $('#resetBtn').addEventListener('click', function () {
       rebuildDB();
@@ -102,11 +111,11 @@
       var m = $('#resultMeta'); if (m) m.textContent = '';
     });
     $$('.editor-quick .chip').forEach(function (c) {
-      c.addEventListener('click', function () { var ta = $('#sqlInput'); ta.value = c.dataset.q; runQuery(ta.value); });
+      c.addEventListener('click', function () { var ta = $('#sqlInput'); ta.value = c.dataset.q; doRun(); });
     });
     var ta = $('#sqlInput');
     ta.addEventListener('keydown', function (e) {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); runQuery(ta.value); }
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); doRun(); }
     });
   }
 
@@ -114,6 +123,7 @@
   function setupQuestionMode(q) {
     var panel = $('#questionPanel');
     panel.hidden = false;
+    var cnt = window.Site.getPracticeCount(q.id);
     panel.innerHTML =
       '<div class="qm-head">' +
         '<span class="qm-no"># ' + q.id + '</span>' +
@@ -121,10 +131,12 @@
         '<span class="badge ' + q.difficulty + '">' + q.difficulty + '</span>' +
       '</div>' +
       '<div class="qm-q">' + esc(q.question) + '</div>' +
+      '<div class="qm-count" id="qmCount">📈 已练习 ' + cnt + ' 次</div>' +
       '<div class="qm-actions">' +
         '<button class="btn small" id="qmHint">💡 显示提示</button>' +
         '<button class="btn small primary" id="qmAnswer">✅ 显示答案</button>' +
         '<button class="btn small" id="qmBlank">↺ 清空编辑器</button>' +
+        '<a class="btn small" href="notes.html?ctx=' + encodeURIComponent('题目 #' + q.id + '：' + q.question) + '">📝 记笔记</a>' +
       '</div>' +
       '<div class="qm-hint" id="qmHintBox" hidden>' + esc(q.hint) + '</div>';
 
@@ -198,6 +210,8 @@
           '<pre><code>' + esc(sec.example) + '</code></pre>';
       }
       if (sec.tip) html += '<div class="tut-tip">💡 ' + esc(sec.tip) + '</div>';
+      html += '<div class="tut-note"><a class="btn small" href="notes.html?ctx=' +
+        encodeURIComponent('教程 · ' + sec.title) + '">📝 记笔记（关联本节）</a></div>';
       main.innerHTML = html;
       if (history.replaceState) history.replaceState(null, '', '#sec-' + idx);
       if (window.innerWidth <= 760) main.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -248,7 +262,10 @@
           '<pre class="cheat-syntax">' + esc(it.syntax) + '</pre>' +
           '<div class="cheat-meta">' +
             '<span class="cheat-desc">' + esc(it.desc) + '</span>' +
-            '<button class="copy-btn" data-copy="' + encodeURIComponent(it.syntax) + '">复制</button>' +
+            '<span class="cheat-links">' +
+              '<a class="cheat-note" href="notes.html?ctx=' + encodeURIComponent('速查 · ' + grp.group + '：' + it.syntax) + '">📝</a>' +
+              '<button class="copy-btn" data-copy="' + encodeURIComponent(it.syntax) + '">复制</button>' +
+            '</span>' +
           '</div>';
         grid.appendChild(card);
       });
@@ -293,20 +310,25 @@
       return (qFilterDiff === '全部' || q.difficulty === qFilterDiff) &&
              (qFilterCat === '全部' || q.category === qFilterCat);
     });
-    stats.textContent = '共 ' + filtered.length + ' 题（总题库 ' + window.SQL_QUESTIONS.length + ' 题）';
+    var total = window.Site.getTotalPractice();
+    stats.textContent = '共 ' + filtered.length + ' 题（总题库 ' + window.SQL_QUESTIONS.length + ' 题）' +
+      (total ? ' · 累计练习 ' + total + ' 次' : '');
     list.innerHTML = '';
     filtered.forEach(function (q) {
       var card = document.createElement('div');
       card.className = 'q-card';
       card.id = 'q-card-' + q.id;
+      var cnt = window.Site.getPracticeCount(q.id);
       card.innerHTML =
         '<div class="q-top"><span class="q-no"># ' + q.id + '</span>' +
           '<span class="q-cat">' + esc(q.category) + '</span>' +
+          (cnt > 0 ? '<span class="q-prac">已练 ' + cnt + ' 次</span>' : '') +
           '<span class="badge ' + q.difficulty + '">' + q.difficulty + '</span></div>' +
         '<div class="q-q">' + esc(q.question) + '</div>' +
         '<div class="q-actions">' +
           '<button class="btn small" data-act="toggle">显示提示 / 答案</button>' +
           (q.requiresDB ? '<a class="btn small primary" href="practice.html?q=' + q.id + '">⚡ 在训练场练习</a>' : '') +
+          '<a class="btn small" href="notes.html?ctx=' + encodeURIComponent('题目 #' + q.id + '：' + q.question) + '">📝 记笔记</a>' +
         '</div>' +
         '<div class="q-body"><div class="lbl">💡 提示</div><div>' + esc(q.hint) + '</div>' +
           '<div class="lbl">✅ 参考答案</div><pre><code>' + esc(q.answer) + '</code></pre></div>';
@@ -320,9 +342,119 @@
     });
   }
 
+  /* ===================== 笔记 ===================== */
+  function renderNotes() {
+    var listEl = $('#noteList');
+    var titleEl = $('#noteTitle');
+    var ctxEl = $('#noteCtx');
+    var contentEl = $('#noteContent');
+    var saveBtn = $('#noteSave');
+    var newBtn = $('#noteNew');
+    var filterEl = $('#noteFilter');
+    var countEl = $('#noteCount');
+    var exportBtn = $('#noteExport');
+    var clearBtn = $('#noteClear');
+    var editingId = null;
+
+    function load() { return window.Site.storeGet(window.Site.NOTES_KEY, []); }
+    function save(arr) { window.Site.storeSet(window.Site.NOTES_KEY, arr); }
+    function fmt(ts) {
+      var d = new Date(ts);
+      var p = function (n) { return (n < 10 ? '0' : '') + n; };
+      return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
+    }
+
+    function resetComposer() {
+      editingId = null; titleEl.value = ''; ctxEl.value = ''; contentEl.value = '';
+      saveBtn.textContent = '💾 保存笔记'; newBtn.style.display = 'none';
+    }
+
+    function renderList() {
+      var notes = load();
+      var kw = (filterEl.value || '').trim().toLowerCase();
+      var view = notes.filter(function (n) {
+        if (!kw) return true;
+        return (n.title + ' ' + n.content + ' ' + (n.ctx || '')).toLowerCase().indexOf(kw) >= 0;
+      });
+      countEl.textContent = '共 ' + notes.length + ' 条' + (kw ? '（匹配 ' + view.length + ' 条）' : '');
+      if (!view.length) {
+        listEl.innerHTML = '<div class="search-empty">' + (notes.length ? '没有匹配的笔记。' : '还没有笔记，写下第一条吧 👇') + '</div>';
+        return;
+      }
+      listEl.innerHTML = '';
+      view.forEach(function (n) {
+        var card = document.createElement('div');
+        card.className = 'note-card';
+        card.innerHTML =
+          '<div class="note-head"><span class="note-title">' + esc(n.title) + '</span>' +
+            '<span class="note-time">' + fmt(n.updated) + '</span></div>' +
+          (n.ctx ? '<div class="note-ctx">🔗 ' + esc(n.ctx) + '</div>' : '') +
+          '<div class="note-content">' + esc(n.content) + '</div>' +
+          '<div class="note-actions">' +
+            '<button class="btn small" data-act="edit" data-id="' + n.id + '">✏️ 编辑</button>' +
+            '<button class="btn small" data-act="del" data-id="' + n.id + '">🗑️ 删除</button>' +
+          '</div>';
+        listEl.appendChild(card);
+      });
+    }
+
+    // 从其他页面带 ?ctx= 进来，预填关联上下文
+    var ctx = window.Site.getParam('ctx');
+    if (ctx) { ctxEl.value = ctx; setTimeout(function () { contentEl.focus(); }, 60); }
+
+    saveBtn.addEventListener('click', function () {
+      var title = titleEl.value.trim();
+      var content = contentEl.value.trim();
+      if (!title && !content) { contentEl.focus(); return; }
+      var notes = load();
+      var now = Date.now();
+      if (editingId) {
+        var t = notes.filter(function (x) { return x.id === editingId; })[0];
+        if (t) { t.title = title || '未命名笔记'; t.content = content; t.ctx = ctxEl.value.trim(); t.updated = now; }
+      } else {
+        notes.unshift({ id: 'n' + now + '_' + Math.floor(Math.random() * 1000), title: title || '未命名笔记', content: content, ctx: ctxEl.value.trim(), updated: now });
+      }
+      save(notes); resetComposer(); renderList();
+    });
+    newBtn.addEventListener('click', resetComposer);
+    filterEl.addEventListener('input', renderList);
+    clearBtn.addEventListener('click', function () {
+      if (!load().length) return;
+      if (confirm('确定要清空全部笔记吗？此操作不可恢复。')) { save([]); resetComposer(); renderList(); }
+    });
+    exportBtn.addEventListener('click', function () {
+      var notes = load();
+      var blob = new Blob([JSON.stringify(notes, null, 2)], { type: 'application/json' });
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'sql-notes-' + new Date().toISOString().slice(0, 10) + '.json';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      URL.revokeObjectURL(a.href);
+    });
+    listEl.addEventListener('click', function (e) {
+      var btn = e.target.closest('button[data-act]');
+      if (!btn) return;
+      var id = btn.dataset.id;
+      var notes = load();
+      if (btn.dataset.act === 'del') {
+        if (confirm('删除这条笔记？')) { save(notes.filter(function (x) { return x.id !== id; })); renderList(); }
+      } else if (btn.dataset.act === 'edit') {
+        var t = notes.filter(function (x) { return x.id === id; })[0];
+        if (t) {
+          editingId = id; titleEl.value = t.title; ctxEl.value = t.ctx || ''; contentEl.value = t.content;
+          saveBtn.textContent = '💾 更新笔记'; newBtn.style.display = '';
+          titleEl.scrollIntoView({ behavior: 'smooth', block: 'center' }); contentEl.focus();
+        }
+      }
+    });
+    renderList();
+  }
+
   /* ===================== 启动 ===================== */
   function boot() {
-    if (page === 'tutorial') {
+    if (page === 'notes') {
+      renderNotes();
+    } else if (page === 'tutorial') {
       renderTutorial();
     } else if (page === 'cheatsheet') {
       renderCheatsheet();
@@ -350,7 +482,7 @@
       var ta = $('#sqlInput');
       if (qid) {
         var q = window.SQL_QUESTIONS.filter(function (x) { return String(x.id) === String(qid); })[0];
-        if (q) { setupQuestionMode(q); }      // 编辑器留空，先自行思考
+        if (q) { currentQid = String(q.id); setupQuestionMode(q); }      // 编辑器留空，先自行思考
         else if (ta) { ta.value = 'SELECT * FROM books LIMIT 10;'; }
       } else if (sql) {
         pendingRun = decodeURIComponent(sql);  // 教程示例：预填并运行

@@ -54,11 +54,49 @@
     return new URLSearchParams(window.location.search).get(name);
   }
 
+  /* ============================================================
+   * 本地存储辅助 + 练习次数统计（基于 localStorage，持久化）
+   * ============================================================ */
+  var PRACTICE_KEY = 'sql_practice_counts';
+  var NOTES_KEY = 'sql_notes';
+
+  function storeGet(key, def) {
+    try { var v = localStorage.getItem(key); return v ? JSON.parse(v) : def; }
+    catch (e) { return def; }
+  }
+  function storeSet(key, val) {
+    try { localStorage.setItem(key, JSON.stringify(val)); } catch (e) {}
+  }
+
+  // 练习次数：每个题目 id -> 次数
+  function getPracticeCount(qid) {
+    var m = storeGet(PRACTICE_KEY, {});
+    return m[String(qid)] || 0;
+  }
+  function bumpPractice(qid) {
+    var m = storeGet(PRACTICE_KEY, {});
+    qid = String(qid);
+    m[qid] = (m[qid] || 0) + 1;
+    storeSet(PRACTICE_KEY, m);
+    return m[qid];
+  }
+  function getTotalPractice() {
+    var m = storeGet(PRACTICE_KEY, {}), t = 0;
+    Object.keys(m).forEach(function (k) { t += m[k]; });
+    return t;
+  }
+
   window.Site = {
     initNav: initNav,
     escapeHtml: escapeHtml,
     copyText: copyText,
-    getParam: getParam
+    getParam: getParam,
+    storeGet: storeGet,
+    storeSet: storeSet,
+    getPracticeCount: getPracticeCount,
+    bumpPractice: bumpPractice,
+    getTotalPractice: getTotalPractice,
+    NOTES_KEY: NOTES_KEY
   };
 
   /* ============================================================

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>我的笔记 · SQL 学习中心</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body data-page="notes">
+  <header class="topbar">
+    <div class="brand">
+      <button class="menu-toggle" id="menuToggle" aria-label="菜单" aria-expanded="false">☰</button>
+      <span class="logo">🛢️</span>
+      <div class="brand-text">
+        <a href="index.html" class="brand-link"><h1>SQL 学习中心</h1></a>
+        <p class="subtitle">教程 · 速查表 · 题库 · 训练场</p>
+      </div>
+    </div>
+    <nav class="nav" id="nav">
+      <a href="index.html" data-nav="home">🏠 主页</a>
+      <a href="tutorial.html" data-nav="tutorial">📘 教程</a>
+      <a href="cheatsheet.html" data-nav="cheatsheet">📋 速查表</a>
+      <a href="questions.html" data-nav="questions">🧩 题库</a>
+      <a href="practice.html" data-nav="practice">⚡ 训练场</a>
+      <a href="notes.html" data-nav="notes">📝 笔记</a>
+    </nav>
+  </header>
+
+  <main class="notes-page">
+    <div class="section-head">
+      <h2>我的笔记</h2>
+      <p>随手记录学习心得，全部保存在本机浏览器（localStorage），不上传服务器。在教程、题库、速查表任意位置点「📝 记笔记」，都会带关联上下文跳到这里。</p>
+    </div>
+
+    <section class="note-composer">
+      <div class="note-row">
+        <input id="noteTitle" class="note-input" type="text" placeholder="标题（留空则记为「未命名笔记」）" />
+      </div>
+      <div class="note-row">
+        <input id="noteCtx" class="note-input ctx" type="text" placeholder="关联上下文（如：题目 #5 / 教程 · JOIN）——可留空" />
+      </div>
+      <textarea id="noteContent" class="note-textarea" placeholder="写点什么…（支持多行）"></textarea>
+      <div class="note-composer-actions">
+        <button id="noteSave" class="btn primary">💾 保存笔记</button>
+        <button id="noteNew" class="btn" style="display:none">＋ 新建</button>
+      </div>
+    </section>
+
+    <div class="note-toolbar">
+      <input id="noteFilter" class="note-input" type="search" placeholder="筛选笔记…" />
+      <span id="noteCount" class="note-count"></span>
+      <button id="noteExport" class="btn small">⬇️ 导出 JSON</button>
+      <button id="noteClear" class="btn small">🗑️ 清空全部</button>
+    </div>
+
+    <div id="noteList" class="note-list"></div>
+  </main>
+
+  <footer class="footer">
+    <span>SQL 学习中心 · 基于 SQLite (sql.js) 纯前端构建</span>
+  </footer>
+
+  <script src="js/site.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
