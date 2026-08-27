@@ -1,0 +1,201 @@
+:root {
+  --bg: #f5f7fb;
+  --panel: #ffffff;
+  --ink: #1f2733;
+  --muted: #6b7686;
+  --line: #e4e8f0;
+  --brand: #2f6df6;
+  --brand-soft: #eaf1ff;
+  --green: #1aa86b;
+  --orange: #e8862e;
+  --red: #e0483e;
+  --code-bg: #f3f5f9;
+  --shadow: 0 1px 3px rgba(20,30,50,.06), 0 6px 18px rgba(20,30,50,.06);
+  --radius: 12px;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  line-height: 1.65;
+  font-size: 15px;
+}
+
+/* ---------- 顶栏 ---------- */
+.topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 12px;
+  padding: 14px 24px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--line);
+  position: sticky; top: 0; z-index: 20;
+}
+.brand { display: flex; align-items: center; gap: 12px; }
+.brand .logo { font-size: 30px; }
+.brand h1 { font-size: 19px; margin: 0; }
+.subtitle { margin: 0; color: var(--muted); font-size: 12.5px; }
+.tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+.tab {
+  border: 1px solid var(--line); background: #fff; color: var(--ink);
+  padding: 8px 16px; border-radius: 999px; cursor: pointer; font-size: 14px;
+  transition: all .15s ease;
+}
+.tab:hover { border-color: var(--brand); color: var(--brand); }
+.tab.active { background: var(--brand); color: #fff; border-color: var(--brand); }
+
+/* ---------- 面板 ---------- */
+.panel { display: none; padding: 22px 24px 60px; max-width: 1180px; margin: 0 auto; }
+.panel.active { display: block; }
+
+.section-head { margin-bottom: 18px; }
+.section-head h2 { margin: 0 0 4px; font-size: 22px; }
+.section-head p { margin: 0; color: var(--muted); }
+
+/* ---------- 教程 ---------- */
+#tutorial.active { display: flex; gap: 22px; align-items: flex-start; max-width: 1180px; }
+.tut-side {
+  flex: 0 0 220px; position: sticky; top: 84px; align-self: flex-start;
+  background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 10px; box-shadow: var(--shadow); max-height: 78vh; overflow: auto;
+}
+.tut-side button {
+  display: block; width: 100%; text-align: left; border: none; background: transparent;
+  padding: 9px 12px; border-radius: 8px; cursor: pointer; color: var(--ink); font-size: 14px;
+}
+.tut-side button:hover { background: var(--brand-soft); }
+.tut-side button.active { background: var(--brand); color: #fff; }
+.tut-main {
+  flex: 1; min-width: 0; background: var(--panel); border: 1px solid var(--line);
+  border-radius: var(--radius); padding: 24px 28px; box-shadow: var(--shadow);
+}
+.tut-main h3 { margin-top: 0; font-size: 21px; }
+.tut-main p { margin: 10px 0; }
+.tut-main ul { padding-left: 20px; }
+.tut-main code {
+  background: var(--code-bg); padding: 1px 6px; border-radius: 5px;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace; font-size: 13px;
+}
+.tut-main pre {
+  background: #0f1626; color: #e6ecf5; padding: 14px 16px; border-radius: 10px;
+  overflow: auto; font-size: 13px; line-height: 1.55;
+}
+.tut-main pre code { background: transparent; color: inherit; padding: 0; }
+.tut-tip {
+  background: var(--brand-soft); border-left: 4px solid var(--brand);
+  padding: 10px 14px; border-radius: 8px; margin-top: 16px; color: #234;
+}
+.tut-example-head { display: flex; align-items: center; justify-content: space-between; margin-top: 18px; }
+.btn {
+  border: 1px solid var(--line); background: #fff; color: var(--ink);
+  padding: 8px 14px; border-radius: 8px; cursor: pointer; font-size: 13.5px;
+}
+.btn:hover { border-color: var(--brand); color: var(--brand); }
+.btn.primary { background: var(--brand); color: #fff; border-color: var(--brand); }
+.btn.primary:hover { filter: brightness(1.05); color: #fff; }
+.btn.small { padding: 5px 10px; font-size: 12.5px; }
+
+/* ---------- 速查表 ---------- */
+.cheat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
+.cheat-card {
+  background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 14px 16px; box-shadow: var(--shadow);
+}
+.cheat-card h3 { margin: 0 0 10px; font-size: 16px; color: var(--brand); }
+.cheat-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 7px 0; border-top: 1px dashed var(--line);
+}
+.cheat-row:first-of-type { border-top: none; }
+.cheat-syntax {
+  font-family: "SFMono-Regular", Consolas, monospace; font-size: 12.8px;
+  background: var(--code-bg); padding: 4px 8px; border-radius: 6px; flex: 1; min-width: 0;
+  overflow-x: auto; white-space: nowrap;
+}
+.cheat-desc { color: var(--muted); font-size: 12.5px; flex: 0 0 88px; text-align: right; }
+.copy-btn {
+  border: none; background: var(--brand-soft); color: var(--brand); cursor: pointer;
+  border-radius: 6px; padding: 4px 8px; font-size: 12px; flex: 0 0 auto;
+}
+.copy-btn:hover { background: var(--brand); color: #fff; }
+
+/* ---------- 题库 ---------- */
+.q-filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+.q-filters button {
+  border: 1px solid var(--line); background: #fff; padding: 6px 13px; border-radius: 999px;
+  cursor: pointer; font-size: 13px;
+}
+.q-filters button.active { background: var(--brand); color: #fff; border-color: var(--brand); }
+.q-stats { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.q-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 14px; }
+.q-card {
+  background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 14px 16px; box-shadow: var(--shadow);
+}
+.q-card .q-top { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.q-no { font-weight: 700; color: var(--brand); font-size: 14px; }
+.q-cat { color: var(--muted); font-size: 12px; }
+.badge {
+  font-size: 11px; padding: 2px 8px; border-radius: 999px; margin-left: auto;
+}
+.badge.入门 { background: #e7f6ee; color: var(--green); }
+.badge.进阶 { background: #fff2e2; color: var(--orange); }
+.badge.高级 { background: #fdeae8; color: var(--red); }
+.q-q { font-size: 14.5px; margin: 6px 0 10px; }
+.q-actions { display: flex; gap: 8px; }
+.q-body { margin-top: 10px; border-top: 1px dashed var(--line); padding-top: 10px; display: none; }
+.q-body.open { display: block; }
+.q-body .lbl { font-size: 12px; color: var(--muted); margin: 8px 0 3px; }
+.q-body pre { background: #0f1626; color: #e6ecf5; padding: 10px 12px; border-radius: 8px; overflow:auto; font-size:12.5px; }
+.q-body code { background: transparent; }
+
+/* ---------- 训练场 ---------- */
+.practice-wrap { display: flex; gap: 18px; align-items: stretch; }
+.editor-col { flex: 1 1 50%; min-width: 320px; display: flex; flex-direction: column; }
+.result-col { flex: 1 1 50%; min-width: 320px; display: flex; flex-direction: column; }
+.editor-head, .result-head {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius) var(--radius) 0 0;
+  padding: 10px 14px; font-size: 13.5px; flex-wrap: wrap;
+}
+.editor-actions { display: flex; gap: 6px; }
+#sqlInput {
+  width: 100%; min-height: 300px; resize: vertical; border: 1px solid var(--line);
+  border-top: none; border-radius: 0 0 var(--radius) var(--radius);
+  padding: 14px 16px; font-family: "SFMono-Regular", Consolas, monospace; font-size: 13.5px;
+  line-height: 1.6; background: #0f1626; color: #e6ecf5; outline: none;
+}
+.editor-quick { margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; font-size: 12.5px; color: var(--muted); }
+.chip { border: 1px solid var(--line); background: #fff; border-radius: 999px; padding: 4px 12px; cursor: pointer; font-size: 12.5px; }
+.chip:hover { border-color: var(--brand); color: var(--brand); }
+.result-area {
+  flex: 1; min-height: 300px; background: var(--panel); border: 1px solid var(--line);
+  border-top: none; border-radius: 0 0 var(--radius) var(--radius); padding: 14px; overflow: auto;
+}
+.result-area .placeholder { color: var(--muted); text-align: center; margin-top: 90px; }
+.result-meta { color: var(--muted); font-size: 12.5px; }
+table.result-tbl { border-collapse: collapse; width: 100%; font-size: 13px; }
+table.result-tbl th, table.result-tbl td {
+  border: 1px solid var(--line); padding: 6px 10px; text-align: left; white-space: nowrap;
+}
+table.result-tbl th { background: var(--brand-soft); position: sticky; top: 0; }
+table.result-tbl tr:nth-child(even) td { background: #fafbfe; }
+.err-box { background: #fdecea; border: 1px solid #f5c6c2; color: #a3231b; padding: 12px 14px; border-radius: 8px; font-size: 13px; white-space: pre-wrap; }
+.ok-box { background: #e7f6ee; border: 1px solid #b7e3cb; color: #157a4d; padding: 10px 14px; border-radius: 8px; font-size: 13px; }
+.schema-box { margin-top: 12px; background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 8px 14px; }
+.schema-box summary { cursor: pointer; font-size: 13.5px; }
+.schema-info { font-size: 12.5px; color: var(--muted); margin-top: 8px; }
+.schema-info code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; color: var(--ink); }
+
+/* ---------- 页脚 ---------- */
+.footer { text-align: center; color: var(--muted); font-size: 12.5px; padding: 24px; }
+
+/* ---------- 响应式 ---------- */
+@media (max-width: 860px) {
+  #tutorial.active { flex-direction: column; }
+  .tut-side { position: static; width: 100%; max-height: none; display: flex; flex-wrap: wrap; gap: 4px; }
+  .tut-side button { width: auto; }
+  .practice-wrap { flex-direction: column; }
+}
