@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SQL 题库（150 题） · SQL 学习中心</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body data-page="questions">
+  <header class="topbar">
+    <div class="brand">
+      <button class="menu-toggle" id="menuToggle" aria-label="菜单" aria-expanded="false">☰</button>
+      <span class="logo">🛢️</span>
+      <div class="brand-text">
+        <a href="index.html" class="brand-link"><h1>SQL 学习中心</h1></a>
+        <p class="subtitle">教程 · 速查表 · 题库 · 训练场</p>
+      </div>
+    </div>
+    <nav class="nav" id="nav">
+      <a href="index.html" data-nav="home">🏠 主页</a>
+      <a href="tutorial.html" data-nav="tutorial">📘 教程</a>
+      <a href="cheatsheet.html" data-nav="cheatsheet">📋 速查表</a>
+      <a href="questions.html" data-nav="questions">🧩 题库</a>
+      <a href="practice.html" data-nav="practice">⚡ 训练场</a>
+    </nav>
+  </header>
+
+  <main>
+    <div class="section-head">
+      <h2>SQL 题库（150 题）</h2>
+      <p>分为「基础入门（50 题）」与「进阶实战（100 题）」两类，覆盖查询、聚合、连接、分组、子查询、窗口函数、CTE、日期、字符串、CASE 与集合运算等实战场景。点开看提示与参考答案；想真跑就点「在训练场练习」——题目会带过去，编辑器先留空，你先自己写，再对照答案。</p>
+    </div>
+    <div class="q-filters" id="qFilters"></div>
+    <div class="q-stats" id="qStats"></div>
+    <div id="qList" class="q-list"></div>
+  </main>
+
+  <footer class="footer">
+    <span>SQL 学习中心 · 基于 SQLite (sql.js) 纯前端构建</span>
+  </footer>
+
+  <script src="js/questions.js"></script>
+  <script src="js/site.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

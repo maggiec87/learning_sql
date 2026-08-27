@@ -3,98 +3,79 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SQL 学习中心 · 教程 / 速查表 / 题库 / 训练场</title>
+  <title>SQL 学习中心 · 主页</title>
   <link rel="stylesheet" href="css/style.css" />
 </head>
-<body>
+<body data-page="home">
   <header class="topbar">
     <div class="brand">
+      <button class="menu-toggle" id="menuToggle" aria-label="菜单" aria-expanded="false">☰</button>
       <span class="logo">🛢️</span>
-      <div>
-        <h1>SQL 学习中心</h1>
-        <p class="subtitle">完整教程 · 速查表 · 100 题题库 · 浏览器内训练场</p>
+      <div class="brand-text">
+        <a href="index.html" class="brand-link"><h1>SQL 学习中心</h1></a>
+        <p class="subtitle">教程 · 速查表 · 题库 · 训练场</p>
       </div>
     </div>
-    <nav class="tabs" id="tabs">
-      <button class="tab active" data-target="tutorial">📘 教程</button>
-      <button class="tab" data-target="cheatsheet">📋 速查表</button>
-      <button class="tab" data-target="questions">🧩 题库</button>
-      <button class="tab" data-target="practice">⚡ 训练场</button>
+    <nav class="nav" id="nav">
+      <a href="index.html" data-nav="home">🏠 主页</a>
+      <a href="tutorial.html" data-nav="tutorial">📘 教程</a>
+      <a href="cheatsheet.html" data-nav="cheatsheet">📋 速查表</a>
+      <a href="questions.html" data-nav="questions">🧩 题库</a>
+      <a href="practice.html" data-nav="practice">⚡ 训练场</a>
     </nav>
   </header>
 
-  <!-- 教程 -->
-  <section id="tutorial" class="panel active">
-    <aside class="tut-side" id="tutSide"></aside>
-    <div class="tut-main" id="tutMain"></div>
-  </section>
-
-  <!-- 速查表 -->
-  <section id="cheatsheet" class="panel">
-    <div class="section-head">
-      <h2>SQL 速查表</h2>
-      <p>按场景分类的常用语法，点击「复制」即可取用。</p>
-    </div>
-    <div id="cheatGrid" class="cheat-grid"></div>
-  </section>
-
-  <!-- 题库 -->
-  <section id="questions" class="panel">
-    <div class="section-head">
-      <h2>SQL 题库（100 题）</h2>
-      <p>由浅入深，覆盖查询、聚合、连接、子查询与窗口函数。点开看提示与参考答案，可一键加载到训练场练习。</p>
-    </div>
-    <div class="q-filters" id="qFilters"></div>
-    <div class="q-stats" id="qStats"></div>
-    <div id="qList" class="q-list"></div>
-  </section>
-
-  <!-- 训练场 -->
-  <section id="practice" class="panel">
-    <div class="practice-wrap">
-      <div class="editor-col">
-        <div class="editor-head">
-          <span>SQL 编辑器（SQLite，浏览器内运行）</span>
-          <div class="editor-actions">
-            <button id="runBtn" class="btn primary">▶ 运行 (Ctrl/Cmd+Enter)</button>
-            <button id="resetBtn" class="btn">↻ 重置数据库</button>
-            <button id="clearBtn" class="btn">清空</button>
-          </div>
-        </div>
-        <textarea id="sqlInput" spellcheck="false" placeholder="在此输入 SQL，例如：SELECT * FROM books LIMIT 10;"></textarea>
-        <div class="editor-quick">
-          <span>快速示例：</span>
-          <button class="chip" data-q="SELECT * FROM books LIMIT 10;">浏览图书</button>
-          <button class="chip" data-q="SELECT name FROM categories;">分类列表</button>
-          <button class="chip" data-q="SELECT b.title, a.name AS 作者 FROM books b JOIN authors a ON b.author_id=a.author_id LIMIT 10;">图书+作者</button>
-          <button class="chip" data-q="SELECT category_id, COUNT(*) AS 数量 FROM books GROUP BY category_id;">分类统计</button>
-        </div>
+  <main class="home">
+    <section class="hero">
+      <h1>从零学 SQL，边学边练</h1>
+      <p>一套完整中文教程 + 速查表 + 150 道练习题（50 基础入门 + 100 进阶实战），配浏览器内真实运行的 SQLite 训练场。无需安装数据库，打开即练。</p>
+      <div class="hero-actions">
+        <a class="btn primary big" href="tutorial.html">📘 从教程开始</a>
+        <a class="btn big" href="practice.html">⚡ 直接进入训练场</a>
       </div>
-      <div class="result-col">
-        <div class="result-head">
-          <span>运行结果</span>
-          <span id="resultMeta" class="result-meta"></span>
-        </div>
-        <div id="resultArea" class="result-area">
-          <div class="placeholder">运行查询后，结果将显示在这里。</div>
-        </div>
-        <details class="schema-box">
-          <summary>📊 数据库结构（点击展开，可在编辑器里引用）</summary>
-          <div id="schemaInfo" class="schema-info"></div>
-        </details>
-      </div>
-    </div>
-  </section>
+    </section>
+
+    <section class="home-cards">
+      <a class="home-card" href="tutorial.html">
+        <div class="hc-icon">📘</div>
+        <h3>完整教程</h3>
+        <p>53 节渐进式中文教程，从 SELECT 到窗口函数、CTE、视图与索引，每节带可运行示例。</p>
+        <span class="hc-go">开始学习 →</span>
+      </a>
+      <a class="home-card" href="cheatsheet.html">
+        <div class="hc-icon">📋</div>
+        <h3>SQL 速查表</h3>
+        <p>11 大类常用语法一键复制，写查询时随手查阅，不再翻文档。</p>
+        <span class="hc-go">查看速查表 →</span>
+      </a>
+      <a class="home-card" href="questions.html">
+        <div class="hc-icon">🧩</div>
+        <h3>题库（150 题）</h3>
+        <p>50 道基础入门 + 100 道进阶实战，按难度与分类筛选，答完可一键到训练场真跑。</p>
+        <span class="hc-go">去刷题 →</span>
+      </a>
+      <a class="home-card" href="practice.html">
+        <div class="hc-icon">⚡</div>
+        <h3>训练场</h3>
+        <p>真正的 SQLite 在浏览器内运行（WebAssembly）。写 SQL、看结果、重置数据，自由练习。</p>
+        <span class="hc-go">打开训练场 →</span>
+      </a>
+    </section>
+
+    <section class="home-note">
+      <h3>📌 如何打开（重要）</h3>
+      <ul>
+        <li>本站在<b>本地服务器</b>下才能加载训练场引擎（WebAssembly 不允许 file:// 直接运行）。启动命令：<code>python -m http.server 8124</code>（在站点目录下），再访问 <code>http://127.0.0.1:8124/</code>。</li>
+        <li>📱 <b>手机访问</b>：让手机与电脑连同一 Wi-Fi，用电脑的<b>局域网 IP</b> 打开，例如 <code>http://192.168.x.x:8124/</code>（不要用 127.0.0.1，那是电脑自己）。命令可加 <code>--bind 0.0.0.0</code> 对外放行端口。</li>
+        <li>示例数据库为「网上书店」：分类 / 作者 / 图书 / 客户 / 订单 / 订单明细 共 6 张表，题库答案均可在该库真实跑通。</li>
+      </ul>
+    </section>
+  </main>
 
   <footer class="footer">
-    <span>SQL 学习中心 · 基于 SQLite (sql.js) 纯前端构建 · 数据为本站示例"网上书店"</span>
+    <span>SQL 学习中心 · 基于 SQLite (sql.js) 纯前端构建 · 数据为本站示例「网上书店」</span>
   </footer>
 
-  <script src="lib/sql-wasm.js"></script>
-  <script src="js/db.js"></script>
-  <script src="js/tutorial.js"></script>
-  <script src="js/cheatsheet.js"></script>
-  <script src="js/questions.js"></script>
-  <script src="js/app.js"></script>
+  <script src="js/site.js"></script>
 </body>
 </html>
