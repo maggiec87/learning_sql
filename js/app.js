@@ -183,12 +183,21 @@
     { name: '⑧ 进阶专题', ids: ['subquery','window','cte','func-ref','next'] }
   ];
   function renderTutorial() {
+    window.__tutMobile = window.innerWidth <= 760;
+    if (window.__tutMobile) renderTutorialMobile();
+    else renderTutorialDesktop();
+  }
+
+  /* 桌面端：整篇连续阅读 + 左侧固定目录 */
+  function renderTutorialDesktop() {
     var side = $('#tutSide'), main = $('#tutMain');
+    side.style.display = '';
+    var tog = $('#tocToggle'); if (tog) tog.style.display = '';
     var list = window.SQL_TUTORIAL;
     var idxMap = {};
     list.forEach(function (s, i) { idxMap[s.id] = i; });
 
-    // ---- 目录（左侧固定 / 移动端抽屉）----
+    // ---- 目录（左侧固定）----
     side.innerHTML = '';
     var dh = document.createElement('div');
     dh.className = 'tut-drawer-head';
@@ -211,7 +220,6 @@
         b.addEventListener('click', function () {
           var sec = document.getElementById('sec-' + i);
           if (sec) sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          if (window.innerWidth <= 760) side.classList.remove('open');
           if (history.replaceState) history.replaceState(null, '', '#sec-' + i);
         });
         side.appendChild(b);
@@ -276,6 +284,81 @@
 
     var tog = $('#tocToggle');
     if (tog) tog.addEventListener('click', function () { side.classList.toggle('open'); });
+  }
+
+  /* 手机端：章节卡片列表 → 单章沉浸式阅读（绕开 fixed 抽屉滚动 bug） */
+  function renderTutorialMobile() {
+    var side = $('#tutSide'), main = $('#tutMain');
+    side.style.display = 'none';
+    var tog = $('#tocToggle'); if (tog) tog.style.display = 'none';
+    var list = window.SQL_TUTORIAL;
+    var idxMap = {};
+    list.forEach(function (s, i) { idxMap[s.id] = i; });
+
+    function renderList() {
+      var html = '<div class="tut-mlist">';
+      TUT_PARTS.forEach(function (part) {
+        html += '<div class="tut-mpart">' + esc(part.name) + '</div>';
+        part.ids.forEach(function (id) {
+          var i = idxMap[id];
+          if (i === undefined) return;
+          html += '<button class="tut-mitem" data-i="' + i + '">' + esc(list[i].title) +
+            '<span class="tut-marrow">›</span></button>';
+        });
+      });
+      html += '</div>';
+      main.innerHTML = html;
+      $$('#tutMain .tut-mitem').forEach(function (b) {
+        b.addEventListener('click', function () { showMobile(+b.dataset.i, true); });
+      });
+      window.scrollTo(0, 0);
+    }
+
+    function showMobile(idx, push) {
+      var sec = list[idx];
+      var prev = idx > 0 ? list[idx - 1] : null;
+      var next = idx < list.length - 1 ? list[idx + 1] : null;
+      var html = '<div class="tut-mread">';
+      html += '<div class="tut-mbar"><button class="tut-mback" id="mBack">‹ 目录</button>' +
+        '<span class="tut-mprog">' + (idx + 1) + ' / ' + list.length + '</span></div>';
+      html += '<article class="tut-marticle">';
+      html += '<h3>' + esc(sec.title) + '</h3>' + sec.html;
+      if (sec.example) {
+        html += '<div class="tut-example-head"><b style="font-size:14px">▎可运行示例</b>' +
+          '<a class="btn small" href="practice.html?sql=' + encodeURIComponent(sec.example) + '">⚡ 在训练场试一试</a></div>' +
+          '<pre><code>' + esc(sec.example) + '</code></pre>';
+      }
+      if (sec.tip) html += '<div class="tut-tip">💡 ' + esc(sec.tip) + '</div>';
+      html += '<div class="tut-note"><a class="btn small" href="notes.html?ctx=' +
+        encodeURIComponent('教程 · ' + sec.title) + '">📝 记笔记（关联本节）</a></div>';
+      html += '</article><div class="tut-mnav">';
+      if (prev) html += '<button class="btn" data-go="' + (idx - 1) + '">‹ ' + esc(prev.title) + '</button>';
+      else html += '<button class="btn" data-go="-1" disabled style="opacity:.5">‹ 已是最前</button>';
+      if (next) html += '<button class="btn" data-go="' + (idx + 1) + '">' + esc(next.title) + ' ›</button>';
+      else html += '<a class="btn" href="questions.html">去题库 ›</a>';
+      html += '</div></div>';
+      main.innerHTML = html;
+      var back = $('#mBack');
+      if (back) back.addEventListener('click', renderList);
+      $$('#tutMain .tut-mnav [data-go]').forEach(function (b) {
+        b.addEventListener('click', function () {
+          var g = +b.dataset.go;
+          if (g < 0) return;
+          showMobile(g, true);
+          window.scrollTo(0, 0);
+        });
+      });
+      window.scrollTo(0, 0);
+      if (push && history.replaceState) history.replaceState(null, '', '#sec-' + idx);
+    }
+
+    var startIdx = 0;
+    if (location.hash.indexOf('#sec-') === 0) {
+      var h = parseInt(location.hash.slice(5), 10);
+      if (!isNaN(h) && list[h]) startIdx = h;
+    }
+    if (startIdx > 0) showMobile(startIdx, false);
+    else renderList();
   }
 
   /* ===================== 速查表 ===================== */
@@ -505,6 +588,14 @@
       renderNotes();
     } else if (page === 'tutorial') {
       renderTutorial();
+      var rtTimer;
+      window.addEventListener('resize', function () {
+        clearTimeout(rtTimer);
+        rtTimer = setTimeout(function () {
+          var m = window.innerWidth <= 760;
+          if (m !== window.__tutMobile) renderTutorial();
+        }, 200);
+      });
     } else if (page === 'cheatsheet') {
       renderCheatsheet();
     } else if (page === 'questions') {

@@ -315,6 +315,33 @@ table.result-tbl tr:nth-child(even) td { background: #fafbfe; }
   /* 滚动定位时给 sticky 顶栏让位，避免内容被遮住 */
   main, .home, .tut-sec { scroll-margin-top: 64px; }
 
+  /* 手机端教程：章节卡片列表 + 单章沉浸式阅读 */
+  .tut-mlist { display: block; }
+  .tut-mpart { font-size: 13px; font-weight: 700; color: var(--muted); letter-spacing: .04em; padding: 18px 4px 8px; }
+  .tut-mitem {
+    display: flex; align-items: center; justify-content: space-between; width: 100%;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
+    padding: 15px 16px; margin-bottom: 10px; font-size: 16px; color: var(--ink);
+    text-align: left; cursor: pointer; box-shadow: var(--shadow); -webkit-tap-highlight-color: transparent;
+  }
+  .tut-mitem:active { background: var(--brand-soft); }
+  .tut-marrow { color: var(--muted); font-size: 18px; line-height: 1; }
+  .tut-mread { display: block; }
+  .tut-mbar {
+    position: sticky; top: 52px; z-index: 5; display: flex; align-items: center; justify-content: space-between;
+    background: var(--panel); border-bottom: 1px solid var(--line); padding: 10px 2px; margin: -4px 0 14px;
+  }
+  .tut-mback { border: none; background: transparent; color: var(--brand); font-size: 15px; cursor: pointer; padding: 4px 4px; }
+  .tut-mprog { font-size: 12.5px; color: var(--muted); }
+  .tut-marticle { font-size: 16px; line-height: 1.85; }
+  .tut-marticle h3 { font-size: 21px; line-height: 1.4; margin: 0 0 12px; }
+  .tut-marticle p { margin: 12px 0; }
+  .tut-marticle code { font-size: 13px; }
+  .tut-marticle pre { font-size: 12.5px; }
+  .tut-marticle th, .tut-marticle td { font-size: 12.5px; padding: 6px 8px; }
+  .tut-mnav { display: flex; gap: 10px; margin-top: 22px; }
+  .tut-mnav .btn { flex: 1 1 0; min-width: 0; text-align: center; font-size: 14px; padding: 12px 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
   .cheat-grid, .q-list { grid-template-columns: 1fr; }
   .hero h1 { font-size: 24px; }
 }
