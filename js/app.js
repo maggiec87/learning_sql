@@ -370,20 +370,37 @@
     if (g) csFilter = g;
     var isMobile = window.innerWidth <= 760;
 
-    // 顶部分类筛选（桌面换行 / 手机横滑）
+    // 顶部分类：桌面=过滤筛选；手机=吸顶胶囊导航（跳转定位，所有分类同页）
     if (box) {
-      var cats = ['全部'].concat(window.SQL_CHEATSHEET.map(function (grp) { return grp.group; }));
       box.innerHTML = '';
-      var row = document.createElement('div'); row.className = 'filter-row';
-      row.innerHTML = '<span class="filter-label">分类：</span>';
-      cats.forEach(function (c) {
-        var b = document.createElement('button'); b.textContent = c; b.dataset.cat = c;
-        if (c === csFilter) b.classList.add('active');
-        b.addEventListener('click', function () { csFilter = c; renderCheatsheet(); });
-        row.appendChild(b);
-      });
-      box.appendChild(row);
-      if (isMobile) box.classList.add('mobile-scroll'); else box.classList.remove('mobile-scroll');
+      box.classList.remove('mobile-scroll');
+      if (isMobile) {
+        var nav = document.createElement('div');
+        nav.className = 'cs-nav';
+        window.SQL_CHEATSHEET.forEach(function (grp, i) {
+          var nb = document.createElement('button');
+          nb.textContent = grp.group; nb.dataset.idx = i;
+          if (i === 0) nb.classList.add('active');
+          nb.addEventListener('click', function () {
+            var el = document.getElementById('cs-grp-' + i);
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          });
+          nav.appendChild(nb);
+        });
+        box.appendChild(nav);
+        box.classList.add('mobile-nav');
+      } else {
+        var cats = ['全部'].concat(window.SQL_CHEATSHEET.map(function (grp) { return grp.group; }));
+        var row = document.createElement('div'); row.className = 'filter-row';
+        row.innerHTML = '<span class="filter-label">分类：</span>';
+        cats.forEach(function (c) {
+          var b = document.createElement('button'); b.textContent = c; b.dataset.cat = c;
+          if (c === csFilter) b.classList.add('active');
+          b.addEventListener('click', function () { csFilter = c; renderCheatsheet(); });
+          row.appendChild(b);
+        });
+        box.appendChild(row);
+      }
     }
 
     function cardHTML(grp, it, mobile) {
@@ -404,11 +421,11 @@
 
     grid.innerHTML = '';
     if (isMobile) {
-      // 手机端：按分类分组的单列沉浸区块（语法自动折行，无需缩放/横滑）
-      window.SQL_CHEATSHEET.forEach(function (grp) {
-        if (csFilter !== '全部' && grp.group !== csFilter) return;
+      // 手机端：所有分类同页，分区大卡 + 语法自动折行（无需缩放/横滑）
+      window.SQL_CHEATSHEET.forEach(function (grp, i) {
         var block = document.createElement('section');
         block.className = 'cheat-block';
+        block.id = 'cs-grp-' + i;
         var title = document.createElement('h3');
         title.className = 'cheat-block-title';
         title.textContent = grp.group;
@@ -423,6 +440,19 @@
         block.appendChild(list);
         grid.appendChild(block);
       });
+      // 滚动高亮当前分类胶囊（scrollspy）
+      var navBtns = $$('#cheatFilters .cs-nav button');
+      if ('IntersectionObserver' in window && navBtns.length) {
+        var io = new IntersectionObserver(function (entries) {
+          entries.forEach(function (en) {
+            if (en.isIntersecting) {
+              var idx = en.target.id.slice(7);
+              navBtns.forEach(function (b) { b.classList.toggle('active', b.dataset.idx === idx); });
+            }
+          });
+        }, { rootMargin: '-130px 0px -62% 0px', threshold: 0 });
+        $$('#cheatGrid .cheat-block').forEach(function (b) { io.observe(b); });
+      }
     } else {
       // 桌面端：原有网格
       window.SQL_CHEATSHEET.forEach(function (grp) {
