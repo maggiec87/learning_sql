@@ -117,6 +117,13 @@
     ta.addEventListener('keydown', function (e) {
       if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); doRun(); }
     });
+    // 快捷键 Alt+R：题目模式下返回题库并定位该题
+    document.addEventListener('keydown', function (e) {
+      if (e.altKey && (e.key === 'r' || e.key === 'R') && currentQid) {
+        e.preventDefault();
+        location.href = 'questions.html#q-' + currentQid;
+      }
+    });
   }
 
   // 题库 → 训练场：保留题目，编辑器留空，先自行思考
@@ -137,6 +144,7 @@
         '<button class="btn small primary" id="qmAnswer">✅ 显示答案</button>' +
         '<button class="btn small" id="qmBlank">↺ 清空编辑器</button>' +
         '<a class="btn small" href="notes.html?ctx=' + encodeURIComponent('题目 #' + q.id + '：' + q.question) + '">📝 记笔记</a>' +
+        '<a class="btn small back" href="questions.html#q-' + q.id + '" title="快捷键：Alt+R">⤴ 返回题库</a>' +
       '</div>' +
       '<div class="qm-hint" id="qmHintBox" hidden>' + esc(q.hint) + '</div>';
 
@@ -180,6 +188,13 @@
     window.SQL_TUTORIAL.forEach(function (s, i) { idxMap[s.id] = i; });
 
     side.innerHTML = '';
+    // 抽屉标题栏（桌面端隐藏，移动端显示；含 ✕ 关闭按钮）
+    var dh = document.createElement('div');
+    dh.className = 'tut-drawer-head';
+    dh.innerHTML = '<span class="tdh-title">📑 目录</span><button class="tdh-close" id="tocClose" aria-label="关闭目录">✕</button>';
+    side.appendChild(dh);
+    var dhClose = document.getElementById('tocClose');
+    if (dhClose) dhClose.addEventListener('click', function () { side.classList.remove('open'); });
     TUT_PARTS.forEach(function (part) {
       var ph = document.createElement('div');
       ph.className = 'tut-part';

@@ -1,0 +1,17 @@
+{
+  "name": "SQL 学习中心",
+  "short_name": "SQL学习",
+  "description": "SQL 完整教程、速查表、150 题题库与浏览器内 SQLite 训练场",
+  "lang": "zh-CN",
+  "start_url": "index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f5f7fb",
+  "theme_color": "#2f6df6",
+  "icons": [
+    { "src": "assets/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

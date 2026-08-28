@@ -36,6 +36,7 @@ body {
 }
 .brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
 .brand .logo { font-size: 28px; }
+.logo-img { width: 30px; height: 30px; display: block; border-radius: 7px; }
 .brand h1 { font-size: 18px; margin: 0; line-height: 1.2; }
 .brand-link { text-decoration: none; color: inherit; }
 .subtitle { margin: 0; color: var(--muted); font-size: 12px; }
@@ -116,6 +117,15 @@ main { max-width: 1180px; margin: 0 auto; padding: 22px 24px 60px; }
 }
 .tut-part:first-child { border-top: none; margin-top: 0; }
 .toc-toggle { display: none; }
+/* 教程目录抽屉标题栏：桌面端隐藏，仅移动端显示 */
+.tut-drawer-head { display: none; }
+/* 教程内容表格：窄屏可横向滚动，避免溢出截断 */
+.tut-main table { display: block; width: 100%; overflow-x: auto; border-collapse: collapse; margin: 12px 0; }
+.tut-main th, .tut-main td { border: 1px solid var(--line); padding: 6px 10px; text-align: left; font-size: 13px; }
+.tut-main th { background: var(--brand-soft); }
+/* 返回题库按钮（训练场题目模式） */
+.btn.back { border-color: var(--green); color: var(--green); }
+.btn.back:hover { background: var(--green); color: #fff; }
 .tut-main {
   flex: 1; min-width: 0; background: var(--panel); border: 1px solid var(--line);
   border-radius: var(--radius); padding: 24px 28px; box-shadow: var(--shadow);
@@ -277,9 +287,29 @@ table.result-tbl tr:nth-child(even) td { background: #fafbfe; }
   .tut-side { display: none; }
   .tut-side.open {
     display: block; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 60;
-    background: var(--panel); padding: 16px; max-height: none; overflow: auto; box-shadow: var(--shadow);
+    background: var(--panel); padding: 16px; max-height: none; overflow: auto;
+    padding-bottom: 90px; overscroll-behavior: contain; box-shadow: var(--shadow);
   }
-  .tut-main { padding: 18px 16px; }
+  /* 抽屉标题栏（移动端显示） */
+  .tut-drawer-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding-bottom: 10px; margin-bottom: 8px; border-bottom: 1px solid var(--line);
+    position: sticky; top: -16px; background: var(--panel); z-index: 2;
+  }
+  .tdh-title { font-weight: 700; font-size: 15px; color: var(--ink); }
+  .tdh-close {
+    border: none; background: var(--brand-soft); color: var(--brand);
+    width: 32px; height: 32px; border-radius: 50%; font-size: 15px; cursor: pointer; line-height: 1;
+  }
+  .tdh-close:hover { background: var(--brand); color: #fff; }
+  .tut-main { padding: 18px 16px; font-size: 15.5px; line-height: 1.75; }
+  .tut-main h3 { font-size: 19px; line-height: 1.4; }
+  .tut-main p { margin: 12px 0; }
+  .tut-main code { font-size: 13px; overflow-wrap: anywhere; }
+  .tut-main pre { font-size: 12.5px; padding: 12px 12px; }
+  .tut-main th, .tut-main td { font-size: 12.5px; padding: 6px 8px; }
+  /* 滚动定位时给 sticky 顶栏让位，避免内容被遮住 */
+  main, .home, .tut-main h3 { scroll-margin-top: 64px; }
 
   .cheat-grid, .q-list { grid-template-columns: 1fr; }
   .hero h1 { font-size: 24px; }
