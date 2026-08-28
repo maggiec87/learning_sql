@@ -368,7 +368,9 @@
     var box = $('#cheatFilters');
     var g = window.Site.getParam('g');
     if (g) csFilter = g;
-    // 顶部分类筛选（题库式）
+    var isMobile = window.innerWidth <= 760;
+
+    // 顶部分类筛选（桌面换行 / 手机横滑）
     if (box) {
       var cats = ['全部'].concat(window.SQL_CHEATSHEET.map(function (grp) { return grp.group; }));
       box.innerHTML = '';
@@ -381,27 +383,57 @@
         row.appendChild(b);
       });
       box.appendChild(row);
+      if (isMobile) box.classList.add('mobile-scroll'); else box.classList.remove('mobile-scroll');
+    }
+
+    function cardHTML(grp, it, mobile) {
+      var head = mobile ? '' :
+        '<div class="cheat-card-head"><span class="cheat-group">' + esc(grp.group) + '</span></div>';
+      return '<div class="' + (mobile ? 'cheat-mcard' : 'cheat-card') + '">' +
+        head +
+        '<pre class="cheat-syntax">' + esc(it.syntax) + '</pre>' +
+        '<div class="cheat-meta">' +
+          '<span class="cheat-desc">' + esc(it.desc) + '</span>' +
+          '<span class="cheat-links">' +
+            '<a class="cheat-note" href="notes.html?ctx=' + encodeURIComponent('速查 · ' + grp.group + '：' + it.syntax) + '">📝</a>' +
+            '<button class="copy-btn" data-copy="' + encodeURIComponent(it.syntax) + '">复制</button>' +
+          '</span>' +
+        '</div>' +
+      '</div>';
     }
 
     grid.innerHTML = '';
-    window.SQL_CHEATSHEET.forEach(function (grp) {
-      if (csFilter !== '全部' && grp.group !== csFilter) return;
-      grp.items.forEach(function (it) {
-        var card = document.createElement('div');
-        card.className = 'cheat-card';
-        card.innerHTML =
-          '<div class="cheat-card-head"><span class="cheat-group">' + esc(grp.group) + '</span></div>' +
-          '<pre class="cheat-syntax">' + esc(it.syntax) + '</pre>' +
-          '<div class="cheat-meta">' +
-            '<span class="cheat-desc">' + esc(it.desc) + '</span>' +
-            '<span class="cheat-links">' +
-              '<a class="cheat-note" href="notes.html?ctx=' + encodeURIComponent('速查 · ' + grp.group + '：' + it.syntax) + '">📝</a>' +
-              '<button class="copy-btn" data-copy="' + encodeURIComponent(it.syntax) + '">复制</button>' +
-            '</span>' +
-          '</div>';
-        grid.appendChild(card);
+    if (isMobile) {
+      // 手机端：按分类分组的单列沉浸区块（语法自动折行，无需缩放/横滑）
+      window.SQL_CHEATSHEET.forEach(function (grp) {
+        if (csFilter !== '全部' && grp.group !== csFilter) return;
+        var block = document.createElement('section');
+        block.className = 'cheat-block';
+        var title = document.createElement('h3');
+        title.className = 'cheat-block-title';
+        title.textContent = grp.group;
+        block.appendChild(title);
+        var list = document.createElement('div');
+        list.className = 'cheat-mlist';
+        grp.items.forEach(function (it) {
+          var wrap = document.createElement('div');
+          wrap.innerHTML = cardHTML(grp, it, true);
+          list.appendChild(wrap.firstChild);
+        });
+        block.appendChild(list);
+        grid.appendChild(block);
       });
-    });
+    } else {
+      // 桌面端：原有网格
+      window.SQL_CHEATSHEET.forEach(function (grp) {
+        if (csFilter !== '全部' && grp.group !== csFilter) return;
+        grp.items.forEach(function (it) {
+          var wrap = document.createElement('div');
+          wrap.innerHTML = cardHTML(grp, it, false);
+          grid.appendChild(wrap.firstChild);
+        });
+      });
+    }
     if (!grid.children.length) {
       grid.innerHTML = '<div class="search-empty">该分类下暂无内容。</div>';
     }
@@ -598,6 +630,15 @@
       });
     } else if (page === 'cheatsheet') {
       renderCheatsheet();
+      window.__csMobile = window.innerWidth <= 760;
+      var csTimer;
+      window.addEventListener('resize', function () {
+        clearTimeout(csTimer);
+        csTimer = setTimeout(function () {
+          var m = window.innerWidth <= 760;
+          if (m !== window.__csMobile) { window.__csMobile = m; renderCheatsheet(); }
+        }, 200);
+      });
     } else if (page === 'questions') {
       // 从搜索/深链进来时，先重置筛选再打开对应题目
       if (location.hash.indexOf('#q-') === 0) {
