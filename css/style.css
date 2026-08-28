@@ -131,6 +131,10 @@ main { max-width: 1180px; margin: 0 auto; padding: 22px 24px 60px; }
   border-radius: var(--radius); padding: 24px 28px; box-shadow: var(--shadow);
 }
 .tut-main h3 { margin-top: 0; font-size: 21px; }
+.tut-sec { padding-bottom: 26px; margin-bottom: 26px; border-bottom: 1px solid var(--line); scroll-margin-top: 72px; }
+.tut-sec:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+.tut-nav { display: flex; justify-content: space-between; gap: 12px; margin-top: 18px; flex-wrap: wrap; }
+.tut-nav .btn { max-width: 48%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tut-main p { margin: 10px 0; }
 .tut-main ul { padding-left: 20px; }
 .tut-main code {
@@ -309,7 +313,7 @@ table.result-tbl tr:nth-child(even) td { background: #fafbfe; }
   .tut-main pre { font-size: 12.5px; padding: 12px 12px; }
   .tut-main th, .tut-main td { font-size: 12.5px; padding: 6px 8px; }
   /* 滚动定位时给 sticky 顶栏让位，避免内容被遮住 */
-  main, .home, .tut-main h3 { scroll-margin-top: 64px; }
+  main, .home, .tut-sec { scroll-margin-top: 64px; }
 
   .cheat-grid, .q-list { grid-template-columns: 1fr; }
   .hero h1 { font-size: 24px; }

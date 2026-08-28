@@ -184,11 +184,12 @@
   ];
   function renderTutorial() {
     var side = $('#tutSide'), main = $('#tutMain');
+    var list = window.SQL_TUTORIAL;
     var idxMap = {};
-    window.SQL_TUTORIAL.forEach(function (s, i) { idxMap[s.id] = i; });
+    list.forEach(function (s, i) { idxMap[s.id] = i; });
 
+    // ---- 目录（左侧固定 / 移动端抽屉）----
     side.innerHTML = '';
-    // 抽屉标题栏（桌面端隐藏，移动端显示；含 ✕ 关闭按钮）
     var dh = document.createElement('div');
     dh.className = 'tut-drawer-head';
     dh.innerHTML = '<span class="tdh-title">📑 目录</span><button class="tdh-close" id="tocClose" aria-label="关闭目录">✕</button>';
@@ -204,21 +205,26 @@
         var i = idxMap[id];
         if (i === undefined) return;
         var b = document.createElement('button');
-        b.textContent = window.SQL_TUTORIAL[i].title;
+        b.textContent = list[i].title;
         b.dataset.idx = i;
         b.className = 'tut-toc-btn';
         b.addEventListener('click', function () {
-          showTut(i);
+          var sec = document.getElementById('sec-' + i);
+          if (sec) sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
           if (window.innerWidth <= 760) side.classList.remove('open');
+          if (history.replaceState) history.replaceState(null, '', '#sec-' + i);
         });
         side.appendChild(b);
       });
     });
 
-    function showTut(idx) {
-      var sec = window.SQL_TUTORIAL[idx];
-      $$('#tutSide .tut-toc-btn').forEach(function (b) { b.classList.toggle('active', +b.dataset.idx === idx); });
-      var html = '<h3>' + sec.title + '</h3>' + sec.html;
+    // ---- 整篇连续内容 ----
+    var html = '';
+    list.forEach(function (sec, i) {
+      var prev = i > 0 ? list[i - 1] : null;
+      var next = i < list.length - 1 ? list[i + 1] : null;
+      html += '<section class="tut-sec" id="sec-' + i + '">';
+      html += '<h3>' + esc(sec.title) + '</h3>' + sec.html;
       if (sec.example) {
         html += '<div class="tut-example-head"><b style="font-size:14px">▎可运行示例</b>' +
           '<a class="btn small" href="practice.html?sql=' + encodeURIComponent(sec.example) + '">⚡ 在训练场试一试</a></div>' +
@@ -227,18 +233,46 @@
       if (sec.tip) html += '<div class="tut-tip">💡 ' + esc(sec.tip) + '</div>';
       html += '<div class="tut-note"><a class="btn small" href="notes.html?ctx=' +
         encodeURIComponent('教程 · ' + sec.title) + '">📝 记笔记（关联本节）</a></div>';
-      main.innerHTML = html;
-      if (history.replaceState) history.replaceState(null, '', '#sec-' + idx);
-      if (window.innerWidth <= 760) main.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-    window.__showTut = showTut;
+      html += '<div class="tut-nav">';
+      if (prev) html += '<a class="btn small" href="#sec-' + (i - 1) + '" data-go="' + (i - 1) + '">← ' + esc(prev.title) + '</a>';
+      else html += '<span></span>';
+      if (next) html += '<a class="btn small" href="#sec-' + (i + 1) + '" data-go="' + (i + 1) + '">' + esc(next.title) + ' →</a>';
+      else html += '<a class="btn small" href="questions.html">🧩 去题库练习 →</a>';
+      html += '</div>';
+      html += '</section>';
+    });
+    main.innerHTML = html;
 
+    // 上一节 / 下一节按钮：平滑滚动
+    $$('#tutMain .tut-nav a[data-go]').forEach(function (a) {
+      a.addEventListener('click', function (e) {
+        e.preventDefault();
+        var sec = document.getElementById('sec-' + a.dataset.go);
+        if (sec) {
+          sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          if (history.replaceState) history.replaceState(null, '', '#sec-' + a.dataset.go);
+        }
+      });
+    });
+
+    // 滚动时高亮当前章节（scrollspy）
+    var tocBtns = $$('#tutSide .tut-toc-btn');
+    function setActive(idx) { tocBtns.forEach(function (b) { b.classList.toggle('active', +b.dataset.idx === idx); }); }
+    if ('IntersectionObserver' in window) {
+      var obs = new IntersectionObserver(function (entries) {
+        entries.forEach(function (en) { if (en.isIntersecting) setActive(+en.target.id.slice(4)); });
+      }, { rootMargin: '-70px 0px -60% 0px', threshold: 0 });
+      $$('#tutMain .tut-sec').forEach(function (s) { obs.observe(s); });
+    }
+
+    // 深链定位
     var startIdx = 0;
     if (location.hash.indexOf('#sec-') === 0) {
       var h = parseInt(location.hash.slice(5), 10);
-      if (!isNaN(h) && window.SQL_TUTORIAL[h]) startIdx = h;
+      if (!isNaN(h) && list[h]) startIdx = h;
     }
-    showTut(startIdx);
+    if (startIdx > 0) { var t = document.getElementById('sec-' + startIdx); if (t) t.scrollIntoView(); }
+    setActive(startIdx);
 
     var tog = $('#tocToggle');
     if (tog) tog.addEventListener('click', function () { side.classList.toggle('open'); });
